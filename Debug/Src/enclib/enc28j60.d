@@ -1,5 +1,6 @@
-Src/main.o: ../Src/main.c \
+Src/enclib/enc28j60.o: ../Src/enclib/enc28j60.c \
  D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Inc/main.h \
+ ../Src/enclib/enc28j60.h \
  D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h \
  D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Inc/stm32f0xx_hal_conf.h \
  D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Inc/main.h \
@@ -27,10 +28,11 @@ Src/main.o: ../Src/main.c \
  D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi.h \
  D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h \
  D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart.h \
- D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h \
- ../Src/enclib/enc28j60.h
+ D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h
 
 D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Inc/main.h:
+
+../Src/enclib/enc28j60.h:
 
 D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h:
 
@@ -87,5 +89,3 @@ D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/st
 D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart.h:
 
 D:/Dropbox/kody/praca/stm32work/stm32f0xxEth/Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h:
-
-../Src/enclib/enc28j60.h:

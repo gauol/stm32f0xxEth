@@ -41,13 +41,14 @@
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-
+unsigned char SPI1_ReadWrite(unsigned char cz);
+void delayUs(uint16_t micros);
 /* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);

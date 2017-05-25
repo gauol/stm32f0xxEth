@@ -41,6 +41,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "string.h"
+#include "enclib/enc28j60.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -50,7 +51,7 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+uint8_t mymac[6] = { 0xf0, 0xd4, 0xa2, 0x9b, 0x12, 0x20 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,6 +65,34 @@ static void MX_USART1_UART_Init(void);
 void print(unsigned char* str){
 	HAL_UART_Transmit(&huart1, str, strlen(str),900);
 }
+
+unsigned char SPI1_ReadWrite(unsigned char cz){
+	  unsigned char in[] = {0, 0};
+	  in[0] = cz;
+	  HAL_SPI_Transmit(&hspi1, in, 1, 1);
+	  unsigned char out[] = {0, 0};
+	  HAL_SPI_Receive(&hspi1, out, 1, 1);
+	  print(out);
+	return out[0];
+}
+
+uint32_t getUs(void) {
+uint32_t usTicks = HAL_RCC_GetSysClockFreq() / 1000000;
+register uint32_t ms, cycle_cnt;
+do {
+ms = HAL_GetTick();
+cycle_cnt = SysTick->VAL;
+} while (ms != HAL_GetTick());
+return (ms * 900) + (usTicks * 900 - cycle_cnt) / usTicks;
+}
+
+void delayUs(uint16_t micros) {
+uint32_t start = getUs();
+while (getUs()-start < (uint32_t) micros) {
+asm("nop");
+}
+}
+
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -99,7 +128,7 @@ int main(void)
   MX_USART1_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
+  enc28j60Init(mymac);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,11 +138,14 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-	  //print("dane 123:)\r\n");
-	  HAL_SPI_Transmit(&hspi1, "123", 3, 1);
 
-	  //HAL_Delay(300);
+	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+	  //HAL_SPI_Transmit(&hspi1, 'a', 1, 1);
+
+	  //print("dane 123:)\r\n");
+	  //HAL_SPI_Transmit(&hspi1, "123", 3, 1);
+
+	  HAL_Delay(300);
   }
   /* USER CODE END 3 */
 
