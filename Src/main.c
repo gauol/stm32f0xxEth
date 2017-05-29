@@ -52,6 +52,9 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 uint8_t mymac[6] = { 0xf0, 0xd4, 0xa2, 0x9b, 0x12, 0x20 };
+
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,13 +69,21 @@ void print(unsigned char* str){
 	HAL_UART_Transmit(&huart1, str, strlen(str),900);
 }
 
+void printINT(uint8_t str){
+	uint8_t table[3];
+	sprintf (table, "%d", str);
+	HAL_UART_Transmit(&huart1, table, 3,100);
+}
+
 unsigned char SPI1_ReadWrite(unsigned char cz){
-	  unsigned char in[] = {0, 0};
+	  unsigned char in[] = {0};
 	  in[0] = cz;
-	  HAL_SPI_Transmit(&hspi1, in, 1, 1);
-	  unsigned char out[] = {0, 0};
-	  HAL_SPI_Receive(&hspi1, out, 1, 1);
-	  print(out);
+	  HAL_SPI_Transmit(&hspi1, in, 1, 100);
+	  unsigned char out[] = {0};
+	  HAL_SPI_Receive(&hspi1, &out[0], 1, 100);
+	  print("Dane: ");
+	  printINT(out);
+	  print("\n\r");
 	return out[0];
 }
 
@@ -126,9 +137,20 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   MX_USART1_UART_Init();
+  uint8_t daneOut[2] = {0x00,0x00};
 
   /* USER CODE BEGIN 2 */
   enc28j60Init(mymac);
+//  daneOut[0] = 0x00;
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+//  HAL_SPI_Transmit(&hspi1, daneOut, 1, 100);
+//  HAL_SPI_Receive(&hspi1, &daneOut[1], 1, 100);
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+//  print("Dane: ");
+//  printINT(daneOut[1]);
+//  print("\n\r");
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,10 +163,11 @@ int main(void)
 
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	  //HAL_SPI_Transmit(&hspi1, 'a', 1, 1);
-
+	  //enc28j60Init(mymac);
+	  //SPI1_ReadWrite("0b10101010");
 	  //print("dane 123:)\r\n");
-	  //HAL_SPI_Transmit(&hspi1, "123", 3, 1);
 
+	  //HAL_SPI_Transmit(&hspi1, dane, 1, 1);
 	  HAL_Delay(300);
   }
   /* USER CODE END 3 */
