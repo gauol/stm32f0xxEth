@@ -49,6 +49,9 @@
 /* USER CODE BEGIN Private defines */
 unsigned char SPI1_ReadWrite(unsigned char cz);
 void delayUs(uint16_t micros);
+void print(unsigned char* str);
+void printINT(uint8_t str);
+
 /* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);

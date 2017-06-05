@@ -1,7 +1,57 @@
-#include "stm32f0xx_hal.h"
-
 #ifndef __ENC28J60_H
 #define __ENC28J60_H
+
+#include "stm32includes.h"
+#define Delay HAL_Delay
+
+/*
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+static inline void uDelay(uint32_t useconds) {
+	volatile int cycleCount = ?
+	while (cycleCount--);
+}
+#pragma GCC pop_options
+*/
+
+#define ETHERNET_LED_GPIO GPIOA
+#define ETHERNET_LED_PIN GPIO_PIN_4
+
+#define ETHERNET_CS_GPIO GPIOB
+#define ETHERNET_CS_PIN GPIO_PIN_1
+
+#define ETHERNET_CS_DELAY 1
+
+#ifndef ETHERNET_LED_GPIO
+#	error Please define ETHERNET_LED_GPIO, for example by gcc option -DETHERNET_LED_GPIO=GPIOA
+#endif
+#ifndef ETHERNET_LED_PIN
+#	error Please define ETHERNET_LED_PIN, for example by gcc option -DETHERNET_LED_PIN=GPIO_PIN_5
+#endif
+
+#ifndef ETHERNET_CS_GPIO
+#	error Please define chip-select GPIO port ETHERNET_CS_GPIO, for example by gcc option -DETHERNET_CSP_GPIO=GPIOA
+#endif
+#ifndef ETHERNET_CS_PIN
+#	error Please define chip-select pin ETHERNET_CS_PIN, for example by gcc option -DETHERNET_CS_PIN=GPIO_PIN_4
+#endif
+
+#ifndef ETHERNET_CS_DELAY
+#	warning ETHERNET_CS_DELAY is not defined. Setting to "2" (mseconds). Adapter may work very slow or not properly. If the latency on "1" is too big, but on "0" the adapter is not working properly, you can try values >= 10: it will use other delay method (for example try value 1000).
+#	define ETHERNET_CS_DELAY 2
+#endif
+
+#if ETHERNET_CS_DELAY >= 10
+#	define ETHERNET_CS_DELAY_PROC {volatile uint32_t i=ETHERNET_CS_DELAY; while(i--);}
+#else
+#	define ETHERNET_CS_DELAY_PROC Delay(ETHERNET_CS_DELAY)
+#endif
+
+#define disableChip  ETHERNET_CS_GPIO->BSRR = ETHERNET_CS_PIN;     ETHERNET_LED_GPIO->BSRR = ETHERNET_LED_PIN << 16; ETHERNET_CS_DELAY_PROC;
+#define enableChip   ETHERNET_CS_GPIO->BSRR = ETHERNET_CS_PIN<<16; ETHERNET_LED_GPIO->BSRR = ETHERNET_LED_PIN;       ETHERNET_CS_DELAY_PROC;
+//#define disableChip  {}
+//#define enableChip   {}
+
 
 // ENC28J60 Control Registers
 // Control register definitions are a combination of address,
@@ -222,6 +272,7 @@
 #define ENC28J60_BIT_FIELD_CLR       0xA0
 #define ENC28J60_SOFT_RESET          0xFF
 
+
 // The RXSTART_INIT should be zero. See Rev. B4 Silicon Errata
 // buffer boundaries applied to internal 8K ram
 // the entire available packet buffer space is allocated
@@ -239,27 +290,35 @@
 #define        MAX_FRAMELEN        1500        // (note: maximum ethernet frame length would be 1518)
 //#define MAX_FRAMELEN     600
 
-#define ENC28J60_CS_PORT GPIOB
-#define ENC28J60_CS_PIN GPIO_PIN_1
+//void ENC28J60_SPI1_Configuration(void);
+//void ENC28J60_GPIO_Configuration(void);
+void enc28j60_set_spi(SPI_HandleTypeDef *hspi_new);
+unsigned char ENC28J60_SendByte(unsigned char dt);
+uint8_t enc28j60ReadOp(uint8_t op, uint8_t address);
 
-//void	ENC28J60_Init(void);
-void ENC28J60_CSL(void);
-void ENC28J60_CSH(void);
-unsigned char enc28j60ReadOp(unsigned char op, unsigned char address);
-void 	enc28j60WriteOp(unsigned char op, unsigned char address, unsigned char data);
-void 	enc28j60ReadBuffer(unsigned int len, unsigned char* data);
-void 	enc28j60WriteBuffer(unsigned int len, unsigned char* data);
-void 	enc28j60SetBank(unsigned char address);
-unsigned char enc28j60Read(unsigned char address);
-void 	enc28j60Write(unsigned char address, unsigned char data);
-void 	enc28j60PhyWrite(unsigned char address, unsigned int data);
-void 	enc28j60clkout(unsigned char clk);
-void 	enc28j60Init(unsigned char* macaddr);
-unsigned char enc28j60getrev(void);
-void 	enc28j60PacketSend(uint16_t len, unsigned char* packet);
-unsigned int enc28j60PacketReceive(unsigned int maxlen, unsigned char* packet);
-void enc28j60EnableBroadcast(void);
-void enc28j60DisableBroadcast(void);
-uint8_t enc28j60linkup(void);
-uint16_t enc28j60PhyReadH(uint8_t address);
-#endif
+
+// functions
+extern uint8_t enc28j60ReadOp(uint8_t op, uint8_t address);
+extern void enc28j60WriteOp(uint8_t op, uint8_t address, uint8_t data);
+extern void enc28j60ReadBuffer(uint16_t len, uint8_t* data);
+extern void enc28j60WriteBuffer(uint16_t len, uint8_t* data);
+extern void enc28j60SetBank(uint8_t address);
+extern uint8_t enc28j60Read(uint8_t address);
+extern void enc28j60Write(uint8_t address, uint8_t data);
+extern void enc28j60PhyWrite(uint8_t address, uint16_t data);
+extern void enc28j60clkout(uint8_t clk);
+extern void enc28j60SpiInit(void);
+extern void enc28j60Init(uint8_t* macaddr);
+extern void enc28j60PacketSend(uint16_t len, uint8_t* packet);
+extern uint16_t enc28j60PacketReceive(uint16_t maxlen, uint8_t* packet);
+extern uint8_t enc28j60getrev(void);
+extern uint8_t enc28j60hasRxPkt(void);
+extern uint8_t enc28j60linkup(void);
+extern void enc28j60EnableBroadcast( void );
+extern void enc28j60DisableBroadcast( void );
+extern void enc28j60EnableMulticast( void );
+extern void enc28j60DisableMulticast( void );
+extern void enc28j60PowerDown();
+extern void enc28j60PowerUp();
+
+#endif /* __ENC28J60_H */
