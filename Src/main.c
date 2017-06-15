@@ -209,7 +209,7 @@ int main(void)
 	  uint8_t data[] = "Hello world!!";
 	  //ES_send_udp_data1(data, 15, 80, dip, 80);
 	 // ES_send_udp_data2(buff, remote_mac, 14, 26525, remote_ip, 36401);
-	  ES_send_udp_data1(buff, (sizeof data)-1, 26525, remote_ip, 36401, data, sizeof data);
+	  ES_send_udp_data1(buff, (sizeof data)-1, 26525, remote_ip, 36401, data);
 
 	  //ES_send_udp_data2(net_sendbuf, remote_mac, (3+channels)*sizeof(*net_senddata), 26524, remote_ip, 36400);
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
