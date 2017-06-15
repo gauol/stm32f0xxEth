@@ -193,8 +193,9 @@ void ES_send_udp_data2(uint8_t *buf, uint8_t *destmac,uint16_t dlen,uint16_t sou
 	send_udp_transmit(buf,dlen);
 }
 
-void ES_send_udp_data1(uint8_t *buf,uint16_t dlen,uint16_t source_port, uint8_t *dest_ip, uint16_t dest_port) {
+void ES_send_udp_data1(uint8_t *buf,uint16_t dlen,uint16_t source_port, uint8_t *dest_ip, uint16_t dest_port, uint8_t *data, uint8_t datalen) {
 	send_udp_prepare(buf,source_port, dest_ip, dest_port);
+	memcpy(buf + UDP_DATA_P, data, datalen);
 	send_udp_transmit(buf,dlen);
 }
 

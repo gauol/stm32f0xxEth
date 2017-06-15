@@ -100,7 +100,7 @@ static uint8_t seqnum=0xa; // my initial tcp sequence number
 #define CLIENTMSS 550
 #define TCP_DATA_START ((uint16_t)TCP_SRC_PORT_H_P+(buf[TCP_HEADER_LEN_P]>>4)*4)
 
-const char arpreqhdr[] ={0,1,8,0,6,4,0,1};
+uint16_t arpreqhdr[] ={0,1,8,0,6,4,0,1};
 #if defined (NTP_client) ||  defined (WOL_client) || defined (UDP_client) || defined (TCP_client) || defined (PING_client)
 const char iphdr[] ={0x45,0,0,0x82,0,0,0x40,0,0x20}; // 0x82 is the total len on ip, 0x20 is ttl (time to live)
 #endif
@@ -717,7 +717,7 @@ void www_server_reply(uint8_t *buf,uint16_t dlen)
 
 #if defined (NTP_client) ||  defined (WOL_client) || defined (UDP_client) || defined (TCP_client) || defined (PING_client)
 // fill buffer with a prog-mem string - CHANGED TO NON PROGMEM!
-void fill_buf_p(uint8_t *buf,uint16_t len, const char *s)
+void fill_buf_p(uint8_t *buf,uint16_t len, uint16_t *s)
 {   
         // fill in tcp data at position pos
         //
@@ -727,7 +727,7 @@ void fill_buf_p(uint8_t *buf,uint16_t len, const char *s)
                 buf++;
                 s++;
                 len--;
-        } 
+        }
 
 }
 #endif
@@ -1738,5 +1738,28 @@ uint16_t packetloop_icmp_tcp(uint8_t *buf,uint16_t plen)
 }
 
 #endif
+uint16_t packetloop_icmp_udp(uint8_t *buf,uint16_t plen)
+{
+	if(eth_type_is_arp_and_my_ip(buf,plen)){
+		if (buf[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REQ_L_V){
+			// is it an arp request
+			make_arp_answer_from_request(buf);
+		}
+		return(0);
+	}
+	// check if ip packets are for us:
+	if(eth_type_is_ip_and_my_ip(buf,plen)==0){
+		return(0);
+	}
+	if(buf[IP_PROTO_P]==IP_PROTO_ICMP_V && buf[ICMP_TYPE_P]==ICMP_TYPE_ECHOREQUEST_V){
+		make_echo_reply_from_request(buf,plen);
+		return(0);
+	}
+	if (buf[IP_PROTO_P]==IP_PROTO_UDP_V) {
+		info_data_len=get_udp_data_len(buf);
+		return(IP_HEADER_LEN+8+14);
+	}
+	return(0);
+}
 
 /* end of ip_arp_udp.c */

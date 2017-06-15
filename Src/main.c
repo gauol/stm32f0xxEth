@@ -53,7 +53,7 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 #define NET_BUF_SIZE (1<<10)
-#define PING_client
+//#define PING
 
 uint8_t mymac[6] = { 0xf0, 0xd4, 0xa2, 0x9b, 0x12, 0x20 };
 uint8_t  ip[]  = {192,  168, 10, 52};
@@ -107,30 +107,8 @@ uint16_t get_udp_data_len(uint8_t *buf)
 	return((uint16_t)i);
 }
 
-static uint16_t info_data_len = 0;
-uint16_t packetloop_icmp_udp(uint8_t *buf,uint16_t plen)
-{
-	if(eth_type_is_arp_and_my_ip(buf,plen)){
-		if (buf[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REQ_L_V){
-			// is it an arp request
-			make_arp_answer_from_request(buf);
-		}
-		return(0);
-	}
-	// check if ip packets are for us:
-	if(eth_type_is_ip_and_my_ip(buf,plen)==0){
-		return(0);
-	}
-	if(buf[IP_PROTO_P]==IP_PROTO_ICMP_V && buf[ICMP_TYPE_P]==ICMP_TYPE_ECHOREQUEST_V){
-		make_echo_reply_from_request(buf,plen);
-		return(0);
-	}
-	if (buf[IP_PROTO_P]==IP_PROTO_UDP_V) {
-		info_data_len=get_udp_data_len(buf);
-		return(IP_HEADER_LEN+8+14);
-	}
-	return(0);
-}
+
+uint8_t net_sendbuf[NET_BUF_SIZE + 1];
 
 /* USER CODE END PFP */
 
@@ -172,10 +150,12 @@ int main(void)
 //  print("\r\n");
   enc28j60_set_spi(&hspi1);
   ES_enc28j60Init(mymac);
-  uint8_t  remote_mac[] = {0xf8, 0xd1, 0x11, 0x03, 0x3b, 0x34};
-  uint8_t  remote_ip[]  = {192,  168, 10, 15};
-  //ES_enc28j60PacketSend(42,ARP_req);
   ES_init_ip_arp_udp_tcp(mymac, ip, 80);
+
+
+
+  //ES_enc28j60PacketSend(42,ARP_req);
+
   print("\r\n Zainicjowalem enc28j60! \r\n");
   uint8_t enc28j60_rev = ES_enc28j60Revision();
   printINT(enc28j60_rev);
@@ -189,24 +169,55 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+ // uint8_t  remote_mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+ // uint8_t  remote_mac[] = {0xf8, 0xd1, 0x11, 0x03, 0x3b, 0x34};
+
+  uint8_t  remote_ip[]  = {192,  168, 10, 15};
+
+  unsigned char ARP_req[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xAC, 0x22,   0x0B, 0x51, 0x7A, 0xEF, 0x08, 0x06, 0x00, 0x01,
+		  	  	  	  	  	 0x08, 0x00, 0x06, 0x04, 0x00, 0x01, 0xAC, 0x22,   0x0B, 0x51, 0x7A, 0xEF, 0xC0, 0xA8, 0x01, 0x02,
+							 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0xA8,   0x01, 0x01};
+
+  unsigned char buff[128];
+
   while (1)
   {
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+//#define UDP_LOOP
+#ifdef UDP_LOOP
+	    uint16_t dat_p;
+		dat_p = packetloop_icmp_udp(net_buf, ES_enc28j60PacketReceive(NET_BUF_SIZE, net_buf));
+		if (dat_p != 0) {
+			memcpy(buf, &net_buf[dat_p], info_data_len);
+			print(buf);
+			make_udp_reply_from_request(net_buf, (char *)buf, info_data_len, 23);
+		}
+#endif
 
-//	    uint16_t dat_p;
-//		dat_p = packetloop_icmp_udp(net_buf, ES_enc28j60PacketReceive(NET_BUF_SIZE, net_buf));
-//		if (dat_p != 0) {
-//			memcpy(buf, &net_buf[dat_p], info_data_len);
-//			print(buf);
-//			make_udp_reply_from_request(net_buf, (char *)buf, info_data_len, 23);
-//		}
-	  uint8_t data[] = {11, 54, 215, 255};
+#ifdef PING
+
+	  while(1)
+		{
+			packetloop_icmp_udp(net_sendbuf, ES_enc28j60PacketReceive(NET_BUF_SIZE, net_sendbuf));
+		}
+#endif
+
+
+	  uint8_t data[] = "Hello world!!";
 	  //ES_send_udp_data1(data, 15, 80, dip, 80);
-	  ES_send_udp_data2(data, remote_mac, 4, 26525, remote_ip, 36401);
-//	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+	 // ES_send_udp_data2(buff, remote_mac, 14, 26525, remote_ip, 36401);
+	  ES_send_udp_data1(buff, (sizeof data)-1, 26525, remote_ip, 36401, data, sizeof data);
+
+	  //ES_send_udp_data2(net_sendbuf, remote_mac, (3+channels)*sizeof(*net_senddata), 26524, remote_ip, 36400);
+	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+	  //unsigned char buff[42];
+	  //client_arp_whohas(buff, remote_ip);
+
 	  HAL_Delay(3000);
+	  //enc28j60PacketSend(42,ARP_req);
   }
   /* USER CODE END 3 */
 

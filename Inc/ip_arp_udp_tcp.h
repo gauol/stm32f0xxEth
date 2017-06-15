@@ -204,6 +204,7 @@ uint8_t tcpActiveOpen( uint8_t *buf,uint16_t plen,
 
 void tcpPassiveOpen( uint8_t *buf,uint16_t plen );
 void tcpClose( uint8_t *buf,uint16_t plen );
+uint16_t packetloop_icmp_udp(uint8_t *buf,uint16_t plen);
 
 #endif /* IP_ARP_UDP_TCP_H */
 //@}

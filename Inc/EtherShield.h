@@ -64,7 +64,7 @@
 	void ES_send_tcp_data(uint8_t *buf,uint16_t dlen );
 
 	// UDP - dirkx
-	void ES_send_udp_data1(uint8_t *buf,uint16_t dlen,uint16_t source_port, uint8_t *dest_ip, uint16_t dest_port);
+	void ES_send_udp_data1(uint8_t *buf,uint16_t dlen,uint16_t source_port, uint8_t *dest_ip, uint16_t dest_port, uint8_t *data, uint8_t datalen);
 	void ES_send_udp_data2(uint8_t *buf, uint8_t *destmac,uint16_t dlen,uint16_t source_port, uint8_t *dest_ip, uint16_t dest_port);
 	
 	//void ES_fill_buf_p(uint8_t *buf,uint16_t len, const prog_char *progmem_s);
